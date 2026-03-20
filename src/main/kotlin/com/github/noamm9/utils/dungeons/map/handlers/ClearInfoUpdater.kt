@@ -46,11 +46,12 @@ object ClearInfoUpdater {
         DungeonListener.dungeonTeammates.toList().forEach { teammate ->
             val name = teammate.name
             val ci = DungeonPlayer.get(name) ?: return@forEach
+            ci.secretsBeforeRun = null
             ProfileUtils.getSecrets(name).onSuccess { secrets ->
                 ci.secretsBeforeRun = secrets
                 if (cdebug) ChatUtils.modMessage("$name has $secrets")
             }.onFailure {
-                ci.secretsBeforeRun = 0
+                ci.secretsBeforeRun = null
                 ChatUtils.modMessage("Failed to get secrets for &b$name&r. &cError: ${it.message}")
                 it.printStackTrace()
             }
@@ -64,10 +65,10 @@ object ClearInfoUpdater {
 
         val msgList = teammates.map { teammate ->
             val before = teammate.secretsBeforeRun
-            val secretsAfterRun = if (before != 0L) ProfileUtils.getSecrets(teammate.name).getOrDefault(before) else 0L
+            val secretsAfterRun = before?.let { ProfileUtils.getSecrets(teammate.name).getOrNull() }
             if (cdebug) ChatUtils.modMessage("${teammate.name} has $secretsAfterRun after run")
             val playerFormatted = "${teammate.clazz.code}${teammate.name}"
-            val foundSecrets = secretsAfterRun - before
+            val foundSecrets = if (before != null && secretsAfterRun != null) secretsAfterRun - before else null
 
             val baseComp = createComponent("${NoammAddons.PREFIX} $playerFormatted&f:&r ")
             val solo = teammate.clearedRooms.first
@@ -76,7 +77,7 @@ object ClearInfoUpdater {
 
             val comps = listOfNotNull(
                 getRoomsClearedComponent(solo, stacked),
-                createComponent("&b$foundSecrets Secrets&r"),
+                createComponent("&b${foundSecrets ?: "?"} Secrets&r"),
                 getDeathCountComponent(deaths)
             )
 
