@@ -137,9 +137,11 @@ object RunSplits: Feature("A Splits HUD for Dungeons.") {
     }
 
     private data class Split(var start: Long? = null, var end: Long? = null)
-    private data class DialogueEntry(val name: String, val start: String? = null, val end: String? = null) {
-        fun startMatches(msg: String) = start == msg || start?.toRegex()?.matches(msg) == true
-        fun endMatches(msg: String) = end == msg || end?.toRegex()?.matches(msg) == true
+    private class DialogueEntry(val name: String, val start: String? = null, val end: String? = null) {
+        private val startRegex = start?.let { Regex(it) }
+        private val endRegex = end?.let { Regex(it) }
+        fun startMatches(msg: String) = start == msg || startRegex?.matches(msg) == true
+        fun endMatches(msg: String) = end == msg || endRegex?.matches(msg) == true
     }
 
     private fun formatTime(ms: Long) = "${(ms / 20) / 60}m ${(ms / 20) % 60}s"

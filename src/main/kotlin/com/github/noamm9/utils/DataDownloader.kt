@@ -52,9 +52,8 @@ object DataDownloader {
     }
 
     private fun update(versionFile: Path, newHash: String) {
+        val tempZipFile = Files.createTempFile("data-download-", ".zip")
         try {
-            val tempZipFile = Files.createTempFile("data-download-", ".zip")
-
             URI.create(DOWNLOAD_URL).toURL().openStream().use { input ->
                 Files.copy(input, tempZipFile, StandardCopyOption.REPLACE_EXISTING)
             }
@@ -65,12 +64,14 @@ object DataDownloader {
             unzip(tempZipFile)
 
             versionFile.writeText(newHash)
-            tempZipFile.deleteIfExists()
 
             LOGGER.info("Data update successful.")
         }
         catch (e: IOException) {
             LOGGER.error("Failed to update data files", e)
+        }
+        finally {
+            tempZipFile.deleteIfExists()
         }
     }
 
