@@ -4,6 +4,7 @@ import com.github.noamm9.NoammAddons.mc
 import com.github.noamm9.mixin.IAbstractContainerScreen
 import com.github.noamm9.ui.customgui.setSlotX
 import com.github.noamm9.ui.customgui.setSlotY
+import com.github.noamm9.features.impl.misc.ScrollableTooltip
 import com.github.noamm9.utils.render.Render2D
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
@@ -14,6 +15,7 @@ import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.inventory.Slot
 import org.lwjgl.glfw.GLFW
 import java.awt.Color
+import kotlin.math.sign
 
 class StorageOverlayScreen : Screen(Component.literal("Storage Overlay")) {
 
@@ -90,7 +92,10 @@ class StorageOverlayScreen : Screen(Component.literal("Storage Overlay")) {
                     overActive = true
                 }
             }
-            if (overActive) return false
+            if (overActive) {
+                ScrollableTooltip.scrollAmountY += sign(verticalAmount).toFloat() * ScrollableTooltip.scrollSpeed.value.toFloat()
+                return true
+            }
         }
         coerceScroll(StorageOverlay.adjustScrollSpeed(verticalAmount).toFloat())
         return true
